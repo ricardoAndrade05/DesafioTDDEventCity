@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.devsuperior.bds02.dto.CityDTO;
 import com.devsuperior.bds02.entities.City;
@@ -20,11 +22,13 @@ public class CityService {
 	@Autowired
 	private CityRepository repository;
 	
+	@Transactional(readOnly = true)
 	public List<CityDTO> findAll() {
 		List<City> cities = repository.findAll(Sort.by("name"));
 		return cities.stream().map(city -> new CityDTO(city)).toList();
 	}
 
+	@Transactional
 	public CityDTO insert(CityDTO dto) {
 		City city = new City();
 		city.setName(dto.getName());
@@ -32,6 +36,7 @@ public class CityService {
 		return new CityDTO(city);
 	}
 
+	@Transactional(propagation = Propagation.SUPPORTS)
 	public void delete(Long id) {
 		if (!repository.existsById(id)) {
 			throw new ResourceNotFoundException("Cidade inexistente com o id: " + id);
